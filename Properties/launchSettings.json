@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ImageCompression": {
+      "commandName": "Project",
+      "commandLineArgs": "WellCompressiveDraw.bmp WellCompressiveDraw.rle"
+    }
+  }
+}
