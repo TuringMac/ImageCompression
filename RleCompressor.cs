@@ -8,17 +8,105 @@ namespace ImageCompression
 {
     struct BmpHeader
     {
+        // ushort 2 bytes
+        // uint   4 bytes
         public ushort Signature; // 2 bytes
-        public uint Size; // 4 bytes
-        // 2 bytes reserved
-        // 2 bytes reserved
-        public uint Offset; // 4 bytes
+        public uint FileSize; // 4 bytes
+        ushort Reserved1; // 2 bytes reserved
+        ushort Reserved2; // 2 bytes reserved
+        public uint OffsetBits; // 4 bytes
+        uint HeaderSize;
+        uint Width;
+        uint Height;
+        ushort Planes;
+        ushort BitCount;
+        uint Compression;
+        uint SizeImage;
+        uint XpelsPerMeter;
+        uint YpelsPerMeter;
+        uint ColorsUsed;
+        uint ColorsImportant;
 
         public BmpHeader(byte[] arr)
         {
             Signature = BitConverter.ToUInt16(arr, 0);
-            Size = BitConverter.ToUInt32(arr, 2);
-            Offset = BitConverter.ToUInt32(arr, 10);
+            FileSize = BitConverter.ToUInt32(arr, 2);
+            Reserved1 = BitConverter.ToUInt16(arr, 6);
+            Reserved2 = BitConverter.ToUInt16(arr, 8);
+            OffsetBits = BitConverter.ToUInt32(arr, 10);
+            HeaderSize = BitConverter.ToUInt32(arr, 14);
+            Width = BitConverter.ToUInt32(arr, 18);
+            Height = BitConverter.ToUInt32(arr, 22);
+            Planes = BitConverter.ToUInt16(arr, 26);
+            BitCount = BitConverter.ToUInt16(arr, 28);
+            Compression = BitConverter.ToUInt32(arr, 30);
+            SizeImage = BitConverter.ToUInt32(arr, 34);
+            XpelsPerMeter = BitConverter.ToUInt32(arr, 38);
+            YpelsPerMeter = BitConverter.ToUInt32(arr, 42);
+            ColorsUsed = BitConverter.ToUInt32(arr, 46);
+            ColorsImportant = BitConverter.ToUInt32(arr, 50);
+        }
+
+        public byte[] ToArray()
+        {
+            var list = new List<byte>();
+
+            list.Add((byte)Signature);
+            list.Add((byte)(Signature >> 8));
+            list.Add((byte)FileSize);
+            list.Add((byte)(FileSize >> 8));
+            list.Add((byte)(FileSize >> 16));
+            list.Add((byte)(FileSize >> 24));
+            list.Add((byte)Reserved1);
+            list.Add((byte)(Reserved1 >> 8));
+            list.Add((byte)Reserved2);
+            list.Add((byte)(Reserved2 >> 8));
+            list.Add((byte)OffsetBits);
+            list.Add((byte)(OffsetBits >> 8));
+            list.Add((byte)(OffsetBits >> 16));
+            list.Add((byte)(OffsetBits >> 24));
+            list.Add((byte)HeaderSize);
+            list.Add((byte)(HeaderSize >> 8));
+            list.Add((byte)(HeaderSize >> 16));
+            list.Add((byte)(HeaderSize >> 24));
+            list.Add((byte)Width);
+            list.Add((byte)(Width >> 8));
+            list.Add((byte)(Width >> 16));
+            list.Add((byte)(Width >> 24));
+            list.Add((byte)Height);
+            list.Add((byte)(Height >> 8));
+            list.Add((byte)(Height >> 16));
+            list.Add((byte)(Height >> 24));
+            list.Add((byte)Planes);
+            list.Add((byte)(Planes >> 8));
+            list.Add((byte)BitCount);
+            list.Add((byte)(BitCount >> 8));
+            list.Add((byte)Compression);
+            list.Add((byte)(Compression >> 8));
+            list.Add((byte)(Compression >> 16));
+            list.Add((byte)(Compression >> 24));
+            list.Add((byte)SizeImage);
+            list.Add((byte)(SizeImage >> 8));
+            list.Add((byte)(SizeImage >> 16));
+            list.Add((byte)(SizeImage >> 24));
+            list.Add((byte)XpelsPerMeter);
+            list.Add((byte)(XpelsPerMeter >> 8));
+            list.Add((byte)(XpelsPerMeter >> 16));
+            list.Add((byte)(XpelsPerMeter >> 24));
+            list.Add((byte)YpelsPerMeter);
+            list.Add((byte)(YpelsPerMeter >> 8));
+            list.Add((byte)(YpelsPerMeter >> 16));
+            list.Add((byte)(YpelsPerMeter >> 24));
+            list.Add((byte)ColorsUsed);
+            list.Add((byte)(ColorsUsed >> 8));
+            list.Add((byte)(ColorsUsed >> 16));
+            list.Add((byte)(ColorsUsed >> 24));
+            list.Add((byte)ColorsImportant);
+            list.Add((byte)(ColorsImportant >> 8));
+            list.Add((byte)(ColorsImportant >> 16));
+            list.Add((byte)(ColorsImportant >> 24));
+
+            return list.ToArray();
         }
     }
     enum Format
@@ -37,7 +125,11 @@ namespace ImageCompression
 
             // cut headers
             var header = new BmpHeader(image);
-            position = header.Offset;
+            foreach (byte b in header.ToArray())
+            {
+                result.Add(b);
+            }
+            position = header.OffsetBits;
 
             Format fmt = Format.BGR;
 
@@ -52,7 +144,7 @@ namespace ImageCompression
 
             sbyte row = 0;
             if (prev == current)
-                row = 1;
+                row = 0;
             else
                 row = -1;
 
@@ -186,28 +278,42 @@ namespace ImageCompression
             }
         }
 
-        public byte[] Decompress(FileStream image)
+        public byte[] Decompress(byte[] image)
         {
             List<byte> result = new List<byte>();
-            //byte[] header = { 66, 77, 54, 0, 48, 0, 0, 0, 0, 0, 54, 0, 0, 0, 40, 0,
-            //                  0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 1, 0, 24, 0, 0, 0,
-            //                  0, 0, 0, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            //                  0, 0, 0, 0, 0, 0 };
-            byte[] header = { 66, 77, 138, 0, 192, 0, 0, 0, 0, 0, 138, 0, 0, 0, 124, 0,
-                              0, 0, 0, 8, 0, 0, 0, 8, 0, 0, 1, 0, 24, 0, 0, 0,
-                              0, 0, 0, 0, 192, 0, 18, 11, 0, 0, 18, 11, 0, 0, 0, 0,
-                              0, 0, 0, 0, 0, 0 };
-            foreach (byte h in header)
-                result.Add(h);
+            var header = new BmpHeader(image);
+            foreach (byte b in header.ToArray())
+                result.Add(b);
+            uint position = header.OffsetBits;
 
-            byte[] buffer = new byte[4];
-            while (image.Read(buffer, 0, buffer.Length) > 0)
+            sbyte row = 0;
+            while (position < image.Length)
             {
-                for (int i = 0; i < buffer[0]; i++)
+                row = (sbyte)image[position];
+                position++;
+                if (row > 0)
                 {
-                    result.Add(buffer[1]);
-                    result.Add(buffer[2]);
-                    result.Add(buffer[3]);
+                    Color col = ReadColor(image, position, Format.BGR);
+                    position += 3;
+                    while (row > 0)
+                    {
+                        result.Add(col.R);
+                        result.Add(col.G);
+                        result.Add(col.B);
+                        row--;
+                    }
+                }
+                else
+                {
+                    while (row < 0)
+                    {
+                        Color col = ReadColor(image, position, Format.BGR);
+                        position += 3;
+                        result.Add(col.R);
+                        result.Add(col.G);
+                        result.Add(col.B);
+                        row++;
+                    }
                 }
             }
             return result.ToArray();

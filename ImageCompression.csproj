@@ -17,6 +17,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Debug127.bmp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Lenna.bmp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -23,9 +23,8 @@ namespace ImageCompression
             File.WriteAllBytes(targetFilename, compressedImage);
 
 
-            FileStream fsTarget = new FileStream(targetFilename, FileMode.Open);
-            byte[] decompressedImage = new RleCompressor().Decompress(fsTarget);
-            fsTarget.Close();
+            compressedImage = File.ReadAllBytes(targetFilename);
+            byte[] decompressedImage = new RleCompressor().Decompress(compressedImage);
             File.WriteAllBytes(resultFilename, decompressedImage);
 
             Console.WriteLine("Compression is: " + (double)sourceImage.Length / compressedImage.Length);
@@ -38,26 +37,29 @@ namespace ImageCompression
             return 0;
         }
 
-        static int Compare(string sourceFilename, string resultFileName)
+        static uint Compare(string sourceFilename, string resultFileName)
         {
             byte[] src = File.ReadAllBytes(sourceFilename);
             byte[] rst = File.ReadAllBytes("result.bmp");
-            int result = 0;
+            uint wrong = 0;
             for (int i = 0; i < src.Length || i < rst.Length; i++)
             {
                 if (i >= src.Length || i >= rst.Length || src[i] != rst[i])
                 {
-                    result = 1;
-                    int a = -1;
-                    int b = -1;
-                    if (i < src.Length)
-                        a = src[i];
-                    if (i < rst.Length)
-                        b = rst[i];
-                    Console.WriteLine($"{i}:\t{a}\t{b}");
+                    wrong++;
+                    if (wrong < 128)
+                    {
+                        int a = -1;
+                        int b = -1;
+                        if (i < src.Length)
+                            a = src[i];
+                        if (i < rst.Length)
+                            b = rst[i];
+                        Console.WriteLine($"{i}:\t{a}\t{b}");
+                    }
                 }
             }
-            return result;
+            return wrong;
         }
     }
 }
