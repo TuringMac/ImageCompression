@@ -18,10 +18,8 @@ namespace ImageCompression
             string targetFilename = args[1];
             string resultFilename = "result.bmp";
 
-            FileStream fsSource = new FileStream(sourceFilename, FileMode.Open);
-            long sourceLen = fsSource.Length;
-            byte[] compressedImage = new RleCompressor().Compress(fsSource);
-            fsSource.Close();
+            byte[] sourceImage = File.ReadAllBytes(sourceFilename);
+            byte[] compressedImage = new RleCompressor().Compress(sourceImage);
             File.WriteAllBytes(targetFilename, compressedImage);
 
 
@@ -30,7 +28,7 @@ namespace ImageCompression
             fsTarget.Close();
             File.WriteAllBytes(resultFilename, decompressedImage);
 
-            Console.WriteLine("Compression is: " + (double)sourceLen / compressedImage.Length);
+            Console.WriteLine("Compression is: " + (double)sourceImage.Length / compressedImage.Length);
             if (Compare(sourceFilename, "result.bmp") != 0)
                 Console.WriteLine("Files not equals!");
             else

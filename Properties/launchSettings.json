@@ -2,7 +2,7 @@
   "profiles": {
     "ImageCompression": {
       "commandName": "Project",
-      "commandLineArgs": "Lenna.bmp compressed.rle"
+      "commandLineArgs": "Test.bmp compressed.rle"
     }
   }
 }
